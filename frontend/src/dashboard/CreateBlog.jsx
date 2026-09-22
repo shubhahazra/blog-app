@@ -1,14 +1,20 @@
 import axios from "axios";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthProvider";
+import { data } from "react-router-dom";
 
 function CreateBlog() {
+  const { fetchBlogs } = useAuth();
+
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [about, setAbout] = useState("");
 
   const [blogImage, setBlogImage] = useState("");
   const [blogImagePreview, setBlogImagePreview] = useState("");
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const changePhotoHandler = (e) => {
     console.log(e);
@@ -23,6 +29,8 @@ function CreateBlog() {
 
   const handleCreateBlog = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("category", category);
@@ -42,6 +50,10 @@ function CreateBlog() {
       );
       console.log(data);
       toast.success(data.message || "Blog creation successfully");
+
+      // Refresh blogs in AuthProvider
+      await fetchBlogs();
+
       setTitle("");
       setCategory("");
       setAbout("");
@@ -49,12 +61,14 @@ function CreateBlog() {
       setBlogImagePreview("");
     } catch (error) {
       console.log(error);
-      toast.error(error.message || "Please fill the required fields");
+      toast.error(error?.response?.data?.message || "Please fill the required fields");
+    } finally {
+      setIsSubmitting(false);
     }
   };
   return (
     <div>
-      <div className="min-h-screen  py-10">
+      <div className="min-h-screen py-10 mt-5 md:mt-0">
         <div className="max-w-4xl mx-auto p-6 border  rounded-lg shadow-lg">
           <h3 className="text-2xl font-semibold mb-8">Create Blog</h3>
           <form onSubmit={handleCreateBlog} className="space-y-6">
@@ -114,9 +128,12 @@ function CreateBlog() {
 
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200"
+              className={`w-full py-3 px-4 rounded-md transition-colors duration-200 ${
+                isSubmitting ? "bg-gray-500 text-black cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white "
+              }`}
+              disabled={isSubmitting}
             >
-              Post Blog
+              {isSubmitting ? "Post..." : "Post Blog"}
             </button>
           </form>
         </div>

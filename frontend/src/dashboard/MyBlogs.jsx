@@ -2,9 +2,11 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
-
+import { useAuth } from "../context/AuthProvider";
 
 const MyBlogs = () => {
+  const { fetchBlogs } = useAuth();
+
   const [myBlogs, setMyBlogs] = useState([]);
   
   useEffect(() => {
@@ -31,22 +33,33 @@ const MyBlogs = () => {
   },[]);
 
     const handleDelete = async (id) => {
-      await axios
-        .delete(`http://localhost:4001/api/blogs/delete/${id}`, {
-          withCredentials: true,
-        })
-        .then((res) => {
-          toast.success(res.data.message || "Blog deleted successfully");
-          setMyBlogs((value) => value.filter((blog) => blog._id !== id));
-        })
-        .catch((error) => {
-          toast.error(error.response?.data?.message || "Failed to delete blog");
-      });
+      try {
+        const { data } = await axios.delete(
+          `http://localhost:4001/api/blogs/delete/${id}`,
+            {
+              withCredentials: true,
+            }
+          );
+
+          toast.success(data.message || "Blog deleted successfully");
+
+          setMyBlogs((value) =>
+            value.filter((blog) => blog._id !== id)
+          );
+
+          await fetchBlogs();
+      } catch (error) {
+        console.log(error);
+
+        toast.error(
+          error.response?.data?.message || "Failed to delete blog"
+        );
+      }
     };
 
   return (
      <div>
-      <div className="container mx-auto my-12 p-4">
+      <div className="container max-w-6xl mx-auto my-2 p-4 mt-10 md:mt-0">
         <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 md:ml-20">
           {myBlogs && myBlogs.length > 0 ? (
             myBlogs.map((element) => (
@@ -87,7 +100,7 @@ const MyBlogs = () => {
             ))
           ) : (
             <p className="text-center text-gray-500">
-              You have not posted any blog to see!
+              You haven't created any blogs yet. Start creating your first blog!
             </p>
           )}
         </div>

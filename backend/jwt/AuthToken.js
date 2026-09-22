@@ -8,7 +8,8 @@ const createTokenAndSaveCookies = async (userId, res) => {
     res.cookie("jwt", token, {
         httpOnly: true,
         secure: false,
-        sameSite: "lax"
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000
     })
 
     await User.findByIdAndUpdate(userId, {token})

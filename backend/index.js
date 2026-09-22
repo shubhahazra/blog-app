@@ -1,5 +1,7 @@
+import "dotenv/config";
+
 import express from 'express';
-import dotenv from 'dotenv';
+// import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { v2 as cloudinary } from 'cloudinary';
 import fileUpload from 'express-fileupload';
@@ -10,7 +12,7 @@ import userRoute from './routes/user.route.js'
 import blogRoute from './routes/blog.route.js' 
 
 const app = express()
-dotenv.config();
+// dotenv.config();
 
 const port = process.env.PORT;
 const MONGO_URL = process.env.MONGO_URI;

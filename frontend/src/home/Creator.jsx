@@ -18,7 +18,7 @@ function Creator() {
     fetchAdmins();
   }, []);
   return (
-    <div className=" container mx-auto p-4">
+    <div className="container mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-6">Popular Creators</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 rounded-full my-5">
         {admin && admin.length > 0 ? (
@@ -40,7 +40,7 @@ function Creator() {
             );
           })
         ) : (
-          <div></div>
+          <div>Loading....</div>
         )}
       </div>
     </div>

@@ -2,8 +2,11 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom'
+import { useAuth } from "../context/AuthProvider";
 
 const UpdateBlog = () => {
+  const { fetchBlogs } = useAuth();
+  
   const navigate = useNavigate();
   const {id} = useParams();
 
@@ -13,6 +16,8 @@ const UpdateBlog = () => {
 
   const [blogImage, setBlogImage] = useState("");
   const [blogImagePreview, setBlogImagePreview] = useState("");
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const changePhotoHandler = (e) => {
     console.log(e);
@@ -24,6 +29,9 @@ const UpdateBlog = () => {
       setBlogImage(file);
     };
   };
+
+  console.log(setBlogImage); //
+  
 
   useEffect(()=>{
     const fetchBlog = async () => {
@@ -37,7 +45,7 @@ const UpdateBlog = () => {
           },
         }
       );
-      console.log(data);
+      console.log(data); // 
       
       setTitle(data?.title);
       setCategory(data?.category);
@@ -54,6 +62,7 @@ const UpdateBlog = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     const formData = new FormData();
     formData.append("title", title);
@@ -73,11 +82,15 @@ const UpdateBlog = () => {
         }
       );
       console.log(data);
+
+      await fetchBlogs();
       toast.success(data?.message || "Blog updated successfully");
       navigate("/")
     } catch (error) {
       console.log(error);
       toast.error(error?.response?.data?.message || "Please fill the required fields");
+    } finally {
+    setIsSubmitting(false);
     }
   }
   return (
@@ -136,10 +149,13 @@ const UpdateBlog = () => {
             />
 
             <button
-              className="w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               onClick={handleUpdate}
+              className={`w-full py-3 px-4 rounded-md transition-colors duration-200 ${
+                isSubmitting ? "bg-gray-500 text-black cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white "
+              }`}
+              disabled={isSubmitting}
             >
-              UPDATE
+              {isSubmitting ? "Update..." : "Update Blog"}
             </button>
           </form>
         </section>

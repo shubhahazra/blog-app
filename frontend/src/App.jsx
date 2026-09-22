@@ -18,12 +18,13 @@ import Notfound from "./pages/Notfound.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 import { Toaster } from "react-hot-toast";
+import VerifyOTP from "./pages/VerifyOTP.jsx";
 
 const App = () => {
   const location = useLocation();
 
   // Pages where Navbar and Footer should NOT appear
-  const hideNavbarFooter = ["/login", "/register"].includes(
+  const hideNavbarFooter = ["/login", "/register", "/dashboard", "/verify-otp"].includes(
     location.pathname
   );
 
@@ -45,6 +46,7 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/creators" element={<Creators />} />
           <Route path="/blog/:id" element={<Detail />} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
 
           {/* ================= PROTECTED ROUTES ================= */}
           <Route

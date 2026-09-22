@@ -2,11 +2,11 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import toast from 'react-hot-toast';
-import { useAuth } from '../context/AuthProvider';
+import { useAuth } from '../context/AuthProvider.jsx';
 
 const Register = () => {
 
-  const {isAuthenticated, setIsAuthenticated, setProfile} = useAuth();
+  const {isAuthenticated, setIsAuthenticated, setProfile, fetchBlogs} = useAuth();
   const navigate = useNavigate();
 
   const [name, setName]=useState("");
@@ -44,6 +44,7 @@ const changePhotoHandler = (e) => {
       setIsSubmitting(false);
       return;
     }
+
     const formData = new FormData()
     formData.append('name', name)
     formData.append('email', email)
@@ -66,13 +67,28 @@ const changePhotoHandler = (e) => {
 
       console.log(data);
 
-      toast.success(
-            data.message || "User login successfully"
-        );
+      // ===================================
+      // Admin Register
+      // ===================================
+      if (role === "admin") {
+        // Save email temporarily
+        sessionStorage.setItem("adminVerificationEmail", data.email);
+        toast.success(data.message || "OTP sent to your email");
 
+        // Admin account is not create yet
+        navigate("/verify-otp");
+        
+        return;
+      }
+
+      // =================================
+      // Normal user registration
+      // =================================
       setIsAuthenticated(true);
-      setProfile(data?.newUser);
-      console.log(data?.newUser); // 
+      setProfile(data?.user);
+      await fetchBlogs();
+
+      console.log(data?.user); // 
       console.log(isAuthenticated); //  
 
       setName("")
@@ -83,18 +99,24 @@ const changePhotoHandler = (e) => {
       setEducation("")
       setPhoto("")
       setPhotoPreview("")
+      
+      toast.success(
+        data.message || "User registered successfully"
+      );
+      
       navigate("/")
     } catch (error) {
       console.log(error);
       console.log("Status:", error.response?.status);
       console.log("Backend message:", error.response?.data);
       toast.error(
-            error.response?.data?.message || "Login failed"
+            error.response?.data?.message || "Registered failed"
       );
     } finally {
         setIsSubmitting(false);
     }
-  }
+  };
+  
   return (
     <div>
       <div className='min-h-screen flex items-center justify-center bg-gray-100'>
@@ -108,8 +130,8 @@ const changePhotoHandler = (e) => {
            <h1 className='text-xl font-semibold mb-6'>Register</h1>
            <select value={role} onChange={(e)=>setRole(e.target.value)} className='w-full p-2 mb-4 border rounded-md'>
             <option value="">Select Role</option>
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
+            <option value="user">Reader</option>
+            <option value="admin">Creator</option>
            </select>
            <div className='mb-4'>
             <input 
@@ -164,10 +186,13 @@ const changePhotoHandler = (e) => {
           </p>
           <button
            type='submit'
-           disabled={isSubmitting}
-           className='w-full p-2 bg-blue-500 hover:bg-blue-800 duration-300 rounded-md text-white'
+           className={`w-full p-2 duration-300 rounded-md  ${
+             isSubmitting ? "bg-gray-500 text-black cursor-not-allowed" : "bg-blue-500 hover:bg-blue-800 text-white"
+            }`}
+            disabled={isSubmitting}
           >
-            {isSubmitting ? "Register..." : "Register"}
+
+            {isSubmitting ? "Registering..." : "Register"}
           </button>
           </form>
         </div>

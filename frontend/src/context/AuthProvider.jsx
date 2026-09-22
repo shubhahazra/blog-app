@@ -1,9 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 
 export const AuthContext = createContext();
@@ -14,8 +9,6 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  console.log(loading);
-  
   const fetchProfile = async () => {
     try {
       const { data } = await axios.get(
@@ -25,15 +18,16 @@ export const AuthProvider = ({ children }) => {
         }
       );
 
-      console.log(data);  //
-      
       setProfile(data);
       setIsAuthenticated(true);
+
+      return true;
     } catch (error) {
-      console.log(error);
       setProfile(null);
       setIsAuthenticated(false);
-    } 
+
+      return false;
+    }
   };
 
   const fetchBlogs = async () => {
@@ -47,36 +41,27 @@ export const AuthProvider = ({ children }) => {
 
       setBlogs(data);
     } catch (error) {
-      console.log(error);
-    } 
-  } 
+      console.log("Fetch blogs error:", error);
+    }
+  };
 
- useEffect(() => {
+  useEffect(() => {
   const loadData = async () => {
     try {
       await Promise.all([
         fetchProfile(),
         fetchBlogs(),
       ]);
+      
     } catch (error) {
       console.log("Load data error:", error);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
   loadData();
 }, []);
-
-console.log(loading);
-
-  useEffect(() => {
-    console.log("Blogs updated:", blogs);
-  }, [blogs]);
-  console.log(profile); //  
-  console.log(blogs);
-  console.log(isAuthenticated);
-  
 
   return (
     <AuthContext.Provider
@@ -97,3 +82,4 @@ console.log(loading);
 };
 
 export const useAuth = () => useContext(AuthContext);
+

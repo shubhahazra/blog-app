@@ -35,7 +35,7 @@ function Blogs() {
               </Link>
             ))
           ) : (
-            <div></div>
+            <div>Loading...</div>
           )}
         </div>
       </div>

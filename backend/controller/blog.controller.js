@@ -18,7 +18,10 @@ export const createBlog = async (req, res) => {
     if (!title || !category || !about) {
       return res
         .status(400)
-        .json({ message: "title, category & about are required fields" });
+        .json({ message: "All fields are required" });
+    }
+    if (about.length < 200) {
+      return res.status(400).json({message: "About must be at least 200 characters"});
     }
     const adminName = req?.user?.name;    
     const adminPhoto = req?.user?.photo?.url;
@@ -95,15 +98,53 @@ export const getMyBlogs = async (req, res) => {
 }
 
 export const updateBlog = async (req, res) => {
-  const { id } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid Blog Id" });
-  }
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Blog Id" });
+    }
+  
+    const blog = await Blog.findById(id);
+    if(!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
 
-  const updatedBlogId = await Blog.findByIdAndUpdate(id, req.body, { new: true });
-  if (!updatedBlogId) {
-    return res.status(404).json({ message: "Blog not found" });
-  }
+    const { title, about, category } = req.body;
+  
+    if (!title || !about || !category) {
+      return res.status(404).json({message: "title, category & about are required fields"});
+    }
 
-  return res.status(200).json(updatedBlogId);
+    if (about.length < 200) {
+      return res.status(400).json({message: "About must be at least 200 character"});
+    }
+
+    blog.title = title;
+    blog.category = category;
+    blog.about = about;
+
+
+    if (req.files?.blogImage) {
+     const newImage = await cloudinary.uploader.upload(
+      req.files.blogImage.tempFilePath
+     );
+  
+     if (blog.blogImage?.public_id) {
+      await cloudinary.uploader.destroy(blog.blogImage?.public_id);
+     }
+  
+     blog.blogImage = {
+      public_id: newImage.public_id,
+      url: newImage.secure_url
+     };
+    };
+  
+    await blog.save();
+  
+    return res.status(200).json({ message: "Blog updated successfully", blog });
+  } catch (error) {
+    console.log("Blog Update error: ", error);
+
+    return res.status(500).json({ message: "Internal server error" })
+  }
 }

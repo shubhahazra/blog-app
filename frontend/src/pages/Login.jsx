@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import toast from 'react-hot-toast';
@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthProvider';
 
 const Login = () => {
 
-  const {isAuthenticated, setIsAuthenticated, setProfile} = useAuth();
+  const {isAuthenticated, setIsAuthenticated, setProfile, fetchBlogs} = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail]=useState("");
@@ -38,20 +38,21 @@ const Login = () => {
         );
 
         console.log(data);
-
-        toast.success(
-            data.message || "User login successfully"
-        );
-
+        
         setIsAuthenticated(true);
         setProfile(data?.user);
+        await fetchBlogs();
         
-      console.log(data?.user); // 
-      console.log(isAuthenticated); // 
-
+        console.log(data?.user); // 
+        console.log(isAuthenticated); // 
+        
         setEmail("");
         setPassword("");
         setRole("");
+        
+        toast.success(
+            data.message || "User login successfully"
+        );
         navigate("/");
 
     } catch (error) {
@@ -80,8 +81,8 @@ const Login = () => {
            <h1 className='text-xl font-semibold mb-6'>Login</h1>
            <select value={role} onChange={(e)=>setRole(e.target.value)} className='w-full p-2 mb-4 border rounded-md'>
             <option value="">Select Role</option>
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
+            <option value="user">Reader</option>
+            <option value="admin">Creator</option>
            </select>
            <div className='mb-4'>
             
@@ -104,12 +105,15 @@ const Login = () => {
             New user?{" "}
             <Link to={"/register"} className='text-blue-600'>Register Now</Link>
           </p>
-          <button 
-            type='submit'
+          <button
+           type='submit'
+           className={`w-full p-2 duration-300 rounded-md  ${
+             isSubmitting ? "bg-gray-500 text-black cursor-not-allowed" : "bg-blue-500 hover:bg-blue-800 text-white"
+            }`}
             disabled={isSubmitting}
-            className='w-full p-2 bg-blue-500 hover:bg-blue-800 duration-300 rounded-md text-white'
           >
-            {isSubmitting ? "Loading..." : "Login"}
+            
+            {isSubmitting ? "Login..." : "Login"}
           </button>
           </form>
         </div>

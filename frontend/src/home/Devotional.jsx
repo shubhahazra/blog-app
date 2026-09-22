@@ -10,7 +10,7 @@ function Devotional() {
   console.log(devotionalBlogs);
   return (
     <div>
-      <div className="container mx-auto my-12 p-4">
+      <div className="container mx-auto my-12 p-6">
         <h1 className="text-2xl font-bold mb-6">Devotional</h1>
         <p className="text-center mb-8">
           The concept of gods varies widely across different cultures,
